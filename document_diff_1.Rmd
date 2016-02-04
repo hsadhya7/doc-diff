@@ -1,0 +1,99 @@
+---
+title: "doc_track"
+author: "Harshali"
+date: "1/30/2016"
+output: html_document
+---
+```{r}
+library(tm)
+```
+The goal is to create a list having the terms, thier positions and if they are the same or changed in other documents.
+
+Import the three text files through following code:-
+
+```{r}
+file1<-readLines("harshaliv1.txt")
+file1<-gsub("[^a-zA-Z0-9]"," ",file1)
+file2<-readLines("harshaliv2.txt")
+file2<-gsub("[^a-zA-Z0-9]"," ",file2)
+file3<-readLines("harshaliv3.txt")
+file3<-gsub("[^a-zA-Z0-9]"," ",file3)
+files<-data.frame(c(file1,file2,file3))
+names(files)<-"documents"
+
+```
+
+The above command returns a list. To compare with each term we split it into single words as follows:-
+
+```{r}
+
+words1<-strsplit(file1," ")# returns list compares words
+words2<-strsplit(file2," ")
+words3<-strsplit(file3," ")
+
+```
+
+To convert it to character vector, we extract it from first element of list:-
+
+```{r}
+words1_char<-tolower(words1[[1]])#returns char vector and lowers the cases
+words2_char<-tolower(words2[[1]])
+words3_char<-tolower(words3[[1]])
+```
+
+Why convert to a corpus, isnt it simpler like this:
+
+```{r}
+setdiff(words2_char, words1_char)
+intersect(words2_char, words3_char)
+setdiff(words2_char, words3_char)
+```
+
+If we invert the order of vectors, we do not get the desired result,for example:
+```{r}
+
+setdiff(words3_char, words2_char)
+
+```
+
+The problem can be fixed by using Union as follows:
+
+```{r}
+union(setdiff(words3_char, words2_char),setdiff(words2_char, words3_char))
+```
+
+Still it returns list of words that are different in two vectors. 
+I am not sure if this is the right approach to find their positions
+and also in terms of semantic meaning for constructing sentences.
+
+By using terms I intended to find the sequence of terms occuring in the text document.
+
+```{r}
+clean_data<-gsub("[^a-zA-Z0-9]"," ",files$documents)
+corpus_clean <- Corpus(VectorSource(clean_data))
+corpus_clean <- tm_map(corpus_clean,content_transformer(tolower)) 
+corpus_clean <- tm_map(corpus_clean, removePunctuation) 
+dtm<-DocumentTermMatrix(corpus_clean) 
+terms<-dtm$dimnames$Terms
+terms
+```
+
+Something like this:
+
+```{r eval=TRUE}
+comp.match.file1<-sapply(words1_char, function(y) grep(y,terms)[1])
+comp.match.file2<-sapply(words2_char, function(y) grep(y,terms)[1])
+comp.match.file3<-sapply(words3_char, function(y) grep(y,terms)[1])
+```
+
+It returns a named integer vector with the word(from the text) and the term number(from dtm)
+present at that word:-
+
+```{r}
+comp.match.file1
+comp.match.file2
+comp.match.file3
+
+```
+
+Words like "my", "of", "be" lists as "NA" , I dont know why dtm ignores the words while constructing dtm.
