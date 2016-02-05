@@ -98,4 +98,5 @@ comp.match.file3
 
 Words like "my", "of", "be" lists as "NA" , I dont know why dtm ignores the words while constructing dtm.
 
-We can solve this later, about the "my", "of", but I think you are right, it is a good idea to use a dtm, also because I think it will speed things up. The one missing element now is to figure out the position in the text of the terms. 
+We can solve this later, about the "my", "of", it may be some pre-processing that is occurring (not sure where though).
+I think you are right, it is a good idea to use a dtm, also because I think it will speed things up. The one missing element now is to figure out the position in the text of the terms.
